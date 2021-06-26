@@ -6,7 +6,7 @@ import axios from "axios";
 
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(
-  "0x0Cc1bb3e59E9c7f76475e6C958892Cd3a3724e98",
+  "0xDbe8b48714d571060085675E1b22f61F506D0Ed3",
   abi,
   provider
 );
