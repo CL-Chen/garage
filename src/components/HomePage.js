@@ -6,7 +6,7 @@ import axios from "axios";
 
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(
-  "0xDbe8b48714d571060085675E1b22f61F506D0Ed3",
+  "0xEa5CD211B11225053d3547a961fD624999794618",
   abi,
   provider
 );
@@ -74,7 +74,7 @@ export const HomePage = () => {
 
     // Create the contract instance
     const contract = new Contract(
-      "0xDbe8b48714d571060085675E1b22f61F506D0Ed3",
+      "0xEa5CD211B11225053d3547a961fD624999794618",
       abi,
       signer
     );
@@ -93,7 +93,7 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen bg-gray-800">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
-        <div className="text-gray-100 text-6xl pt-28 pb-10">ROBOTS</div>
+        <div className="text-gray-100 text-6xl pt-28 pb-10">ANIMALS</div>
         {mintedNftState.state === "PENDING" && (
           <div className="text-xl text-white">LOADING...</div>
         )}
@@ -121,7 +121,7 @@ export const HomePage = () => {
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Buy My Robot
+            Buy Your Own Animal
           </button>
         </div>
       </div>
