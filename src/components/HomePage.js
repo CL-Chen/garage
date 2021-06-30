@@ -6,7 +6,7 @@ import axios from "axios";
 
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(
-  "0xEa5CD211B11225053d3547a961fD624999794618",
+  "0x5AF41d661b9a02Db7897B1aa68213E7AA6D3E3a1",
   abi,
   provider
 );
@@ -74,7 +74,7 @@ export const HomePage = () => {
 
     // Create the contract instance
     const contract = new Contract(
-      "0xEa5CD211B11225053d3547a961fD624999794618",
+      "0x5AF41d661b9a02Db7897B1aa68213E7AA6D3E3a1",
       abi,
       signer
     );
@@ -91,7 +91,7 @@ export const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-800">
+    <div className="min-h-screen bg-green-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
         <div className="text-gray-100 text-6xl pt-28 pb-10">ANIMALS</div>
         {mintedNftState.state === "PENDING" && (
@@ -119,7 +119,7 @@ export const HomePage = () => {
           <button
             onClick={handlePurchase}
             type="button"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Buy Your Own Animal
           </button>
