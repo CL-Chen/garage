@@ -4,7 +4,7 @@ import { config } from "../config";
 import abi from "../fixtures/abi.json";
 import axios from "axios";
 
-var contractAddress = "0x954A23a5B510864F8f79F54d982aBdb9e8827d76";
+var contractAddress = "0xACE5a55fA347c43cdc4271b8931D1338211C8644";
 
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
