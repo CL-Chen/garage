@@ -20,6 +20,9 @@ export const HomePage = () => {
   const [purchaseState, setPurchaseState] = useState({
     state: "UNINITIALIZED",
   });
+  const [transferState, setTransferState] = useState({
+    state: "UNINITIALIZED",
+  });
   const modalVisible =
     purchaseState.state === "PENDING_METAMASK" ||
     purchaseState.state === "PENDING_SIGNER" ||
@@ -84,10 +87,44 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
+  const handleTransfer = async () => {
+    const { ethereum } = window;
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+
+    setTransferState({ state: "PENDING_METAMASK" });
+    await ethereum.request({ method: "eth_requestAccounts" });
+
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
+    const contract = new Contract(contractAddress, abi, signer);
+
+    setTransferState({ state: "PENDING_SIGNER" });
+    const receipt = await contract.transferFrom(
+      "0xf23b5533c3e71a456c9247cd25c722560871c8a2",
+      "0xb77e12c548ed47b2bc96be1f7c1047ebd3448180",
+      2
+    );
+    setTransferState({ state: "PENDING_CONFIRMAION" });
+    const transaction = await receipt.wait();
+    setTransferState({ state: "SUCCESS", transaction });
+
+    // Reload the Robots
+    await loadRobotsData();
+  };
+
   return (
     <div className="min-h-screen bg-green-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
         <div className="text-gray-100 text-6xl pt-28 pb-10">ANIMALS</div>
+        <div className="mt-12">
+          <button
+            onClick={handlePurchase}
+            type="button"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Buy Here!
+          </button>
+        </div>
         {mintedNftState.state === "PENDING" && (
           <div className="text-xl text-white">LOADING...</div>
         )}
@@ -109,21 +146,19 @@ export const HomePage = () => {
                     <div className="text-left text-xs tracking-tighter">
                       {owner}
                     </div>
+                    <button
+                      //onClick={}
+                      type="button"
+                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                    >
+                      Transfer
+                    </button>
                   </div>
                 );
               }
             )}
           </div>
         )}
-        <div className="mt-12">
-          <button
-            onClick={handlePurchase}
-            type="button"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-          >
-            Buy Here!
-          </button>
-        </div>
       </div>
       {modalVisible && (
         <div
