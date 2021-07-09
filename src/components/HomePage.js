@@ -146,13 +146,13 @@ export const HomePage = () => {
                     <div className="text-left text-xs tracking-tighter">
                       {owner}
                     </div>
-                    <button
+                    {/* <button
                       //onClick={}
                       type="button"
                       className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                     >
                       Transfer
-                    </button>
+                    </button> */}
                   </div>
                 );
               }
