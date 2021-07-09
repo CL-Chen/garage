@@ -150,42 +150,30 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
-  const handleTransfer = async () => {
-    const { ethereum } = window;
-    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+  // const handleTransfer = async () => {
+  //   const { ethereum } = window;
+  //   if (typeof ethereum == "undefined") alert("Metamask is not detected");
 
-    setTransferState({ state: "PENDING_METAMASK" });
-    await ethereum.request({ method: "eth_requestAccounts" });
+  //   setTransferState({ state: "PENDING_METAMASK" });
+  //   await ethereum.request({ method: "eth_requestAccounts" });
 
-    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
-    const signer = provider_MetaMask.getSigner();
-    const contract = new Contract(contractAddress, abi, signer);
+  //   const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+  //   const signer = provider_MetaMask.getSigner();
+  //   const contract = new Contract(contractAddress, abi, signer);
 
-    setTransferState({ state: "PENDING_SIGNER" });
-    const receipt = await contract.transferFrom(
-      "0xf23b5533c3e71a456c9247cd25c722560871c8a2",
-      "0xb77e12c548ed47b2bc96be1f7c1047ebd3448180",
-      2
-    );
-    setTransferState({ state: "PENDING_CONFIRMAION" });
-    const transaction = await receipt.wait();
-    setTransferState({ state: "SUCCESS", transaction });
+  //   setTransferState({ state: "PENDING_SIGNER" });
+  //   const receipt = await contract.transferFrom(
+  //     "0xf23b5533c3e71a456c9247cd25c722560871c8a2",
+  //     "0xb77e12c548ed47b2bc96be1f7c1047ebd3448180",
+  //     2
+  //   );
+  //   setTransferState({ state: "PENDING_CONFIRMAION" });
+  //   const transaction = await receipt.wait();
+  //   setTransferState({ state: "SUCCESS", transaction });
 
-    // Reload the Robots
-    await loadRobotsData();
-  };
-
-  class MyForm extends React.Component {
-    render() {
-      return (
-        <form>
-          <h1>Hello</h1>
-          <p>Enter your name:</p>
-          <input type="text" />
-        </form>
-      );
-    }
-  }
+  //   // Reload the Robots
+  //   await loadRobotsData();
+  // };
 
   return (
     <div className="min-h-screen bg-green-700">
