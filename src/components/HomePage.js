@@ -7,7 +7,7 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-const contractAddress = "0xc0185baF0a79cac472aEF2ABF16B8946A5c85792";
+const contractAddress = "0xACE5a55fA347c43cdc4271b8931D1338211C8644";
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -78,20 +78,49 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
+  const [recAdress, setRecAddress] = useState("nullAdd");
+  const [senderAdress, setSenderAddress] = useState("nullSender");
+  const [tokenId, setTokenId] = useState("nullID");
+
+  const handleTransfer = async () => {
+    const { ethereum } = window;
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+
+    setTansactionState({ state: "PENDING_METAMASK" });
+
+    await ethereum.request({ method: "eth_requestAccounts" });
+
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
+    const contract = new Contract(contractAddress, abi, signer);
+
+    setTansactionState({ state: "PENDING_SIGNER" });
+    const receipt = await contract.transferFrom(
+      senderAdress,
+      recAdress,
+      tokenId
+    );
+    setTansactionState({ state: "PENDING_CONFIRMAION" });
+    const transaction = await receipt.wait();
+    setTansactionState({ state: "SUCCESS", transaction });
+
+    await loadRobotsData();
+  };
+
   return (
-    <div className="min-h-screen  bg-gray-700">
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="text-gray-100 text-6xl pt-28 pb-20 font-zCool">
-          Monsters Inc
+    <div className="min-h-screen bg-green-700">
+      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
+        <div className="text-gray-100 text-6xl pt-28 pb-20 font-myZoo">
+          ANIMALS
         </div>
 
         <div className="mb-12">
           <button
             onClick={handlePurchase}
             type="button"
-            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Purchase
+            Buy Your Own Animal
           </button>
         </div>
 
@@ -100,13 +129,17 @@ export const HomePage = () => {
         )}
 
         {mintedNftState.state === "SUCCESS" && (
-          <div className="grid md:grid-cols-3 gap-5">
+          <div className="grid md:grid-cols-4 gap-2">
             {mintedNftState.data.map(
               ({ id, image, name, description, owner }) => {
                 return (
                   <div key={id} className="bg-white rounded p-2">
                     <div>
-                      <img src={image} className="mx-auto p-4" alt={name} />
+                      <img
+                        src={image}
+                        className="mx-auto p-2 object-scale-down h-80"
+                        alt={name}
+                      />
                     </div>
 
                     <div className="text-xl">{name}</div>
@@ -117,6 +150,26 @@ export const HomePage = () => {
                     <div className="text-left text-sm">Owned By:</div>
                     <div className="text-left text-xs tracking-tighter">
                       {owner}
+                    </div>
+
+                    <div className="text-left text-xs m-1 space-x-1">
+                      <label>Transfer To:</label>
+                      <input
+                        className="rounded-md"
+                        type="text"
+                        onChange={(event) => {
+                          setRecAddress(event.target.value);
+                          setSenderAddress(owner);
+                          setTokenId(id);
+                        }}
+                      />
+
+                      <button
+                        className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        onClick={handleTransfer}
+                      >
+                        Gift
+                      </button>
                     </div>
                   </div>
                 );

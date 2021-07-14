@@ -4,7 +4,6 @@ module.exports = {
   theme: {
     extend: {},
     fontFamily: { myZoo: ["Zen Tokyo Zoo"] },
-    fontFamily: { zCool: ["Zen Loop"] },
     screens: {
       sm: "640px",
       // => @media (min-width: 640px) { ... }
