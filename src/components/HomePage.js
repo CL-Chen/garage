@@ -7,7 +7,7 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-const contractAddress = "0xC32C2F02DfFC46BA9EFD8421230C3EeE19fd2ae0";
+const contractAddress = "0xc0185baF0a79cac472aEF2ABF16B8946A5c85792";
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -81,7 +81,9 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen  bg-gray-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="text-gray-100 text-6xl pt-28 pb-20">Monsters Inc</div>
+        <div className="text-gray-100 text-6xl pt-28 pb-20 font-zCool">
+          Monsters Inc
+        </div>
 
         <div className="mb-12">
           <button
