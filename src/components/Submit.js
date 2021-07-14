@@ -4,30 +4,25 @@ import { config } from "../config";
 import abi from "../fixtures/abi.json";
 import axios from "axios";
 
-const contractAddress = "0xACE5a55fA347c43cdc4271b8931D1338211C8644";
-
-const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
-const contract = new Contract(contractAddress, abi, provider);
-
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
+const contractAddress = "0xACE5a55fA347c43cdc4271b8931D1338211C8644";
+const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
+const contract = new Contract(contractAddress, abi, provider);
 
 export const HomePage = () => {
   const [mintedNftState, setMintedNftState] = useState({
     state: "UNINITIALIZED",
   });
-  const [purchaseState, setPurchaseState] = useState({
+  const [transactionState, setTansactionState] = useState({
     state: "UNINITIALIZED",
   });
-  // const [transferState, setTransferState] = useState({
-  //   state: "UNINITIALIZED",
-  // });
 
   const modalVisible =
-    purchaseState.state === "PENDING_METAMASK" ||
-    purchaseState.state === "PENDING_SIGNER" ||
-    purchaseState.state === "PENDING_CONFIRMAION";
+    transactionState.state === "PENDING_METAMASK" ||
+    transactionState.state === "PENDING_SIGNER" ||
+    transactionState.state === "PENDING_CONFIRMAION";
 
   const loadRobotsData = async () => {
     setMintedNftState({
@@ -35,7 +30,7 @@ export const HomePage = () => {
     });
     const totalSupply = await contract.totalSupply();
     const ids = [...Array(totalSupply.toNumber()).keys()];
-    const deferredData = ids.map(async (id) => {
+    const deferredData = ids.reverse().map(async (id) => {
       const ipfsUri = await contract.tokenURI(id);
       const owner = await contract.ownerOf(id);
       const formattedUri = formatIpfsUrl(ipfsUri);
@@ -64,96 +59,118 @@ export const HomePage = () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
 
-    // Prompts Metamask to connect
-    setPurchaseState({ state: "PENDING_METAMASK" });
-    await ethereum.enable();
+    setTansactionState({ state: "PENDING_METAMASK" });
 
-    // Create new provider from Metamask
-    const provider = new providers.Web3Provider(window.ethereum);
+    await ethereum.request({ method: "eth_requestAccounts" });
 
-    // Get the signer from Metamask
-    const signer = provider.getSigner();
-
-    // Create the contract instance
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
     const contract = new Contract(contractAddress, abi, signer);
 
-    // Call the purchase method
-    setPurchaseState({ state: "PENDING_SIGNER" });
-    const receipt = await contract.purchase({ value: utils.parseEther("1") });
-    setPurchaseState({ state: "PENDING_CONFIRMAION" });
+    setTansactionState({ state: "PENDING_SIGNER" });
+    const receipt = await contract.purchase({
+      value: utils.parseEther("1"),
+    });
+    setTansactionState({ state: "PENDING_CONFIRMAION" });
     const transaction = await receipt.wait();
-    setPurchaseState({ state: "SUCCESS", transaction });
+    setTansactionState({ state: "SUCCESS", transaction });
 
-    // Reload the Robots
     await loadRobotsData();
   };
 
-  // const handleTransfer = async () => {
-  //   const { ethereum } = window;
-  //   if (typeof ethereum == "undefined") alert("Metamask is not detected");
+  const [recAdress, setRecAddress] = useState("nullAdd");
+  const [senderAdress, setSenderAddress] = useState("nullSender");
+  const [tokenId, setTokenId] = useState("nullID");
 
-  //   setTransferState({ state: "PENDING_METAMASK" });
-  //   await ethereum.request({ method: "eth_requestAccounts" });
+  const handleTransfer = async () => {
+    const { ethereum } = window;
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
 
-  //   const provider_MetaMask = new providers.Web3Provider(window.ethereum);
-  //   const signer = provider_MetaMask.getSigner();
-  //   const contract = new Contract(contractAddress, abi, signer);
+    setTansactionState({ state: "PENDING_METAMASK" });
 
-  //   setTransferState({ state: "PENDING_SIGNER" });
-  //   const receipt = await contract.transferFrom(
-  //     "0xf23b5533c3e71a456c9247cd25c722560871c8a2",
-  //     "0xb77e12c548ed47b2bc96be1f7c1047ebd3448180",
-  //     2
-  //   );
-  //   setTransferState({ state: "PENDING_CONFIRMAION" });
-  //   const transaction = await receipt.wait();
-  //   setTransferState({ state: "SUCCESS", transaction });
+    await ethereum.request({ method: "eth_requestAccounts" });
 
-  //   // Reload the Robots
-  //   await loadRobotsData();
-  // };
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
+    const contract = new Contract(contractAddress, abi, signer);
+
+    setTansactionState({ state: "PENDING_SIGNER" });
+    const receipt = await contract.transferFrom(
+      senderAdress,
+      recAdress,
+      tokenId
+    );
+    setTansactionState({ state: "PENDING_CONFIRMAION" });
+    const transaction = await receipt.wait();
+    setTansactionState({ state: "SUCCESS", transaction });
+
+    await loadRobotsData();
+  };
 
   return (
     <div className="min-h-screen bg-green-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
-        <div className="text-gray-100 text-6xl pt-28 pb-10">ANIMALS</div>
-        <div className="mt-12">
+        <div className="text-gray-100 text-6xl pt-28 pb-20 font-myZoo">
+          ANIMALS
+        </div>
+
+        <div className="mb-12">
           <button
             onClick={handlePurchase}
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Buy Here!
+            Buy Your Own Animal
           </button>
         </div>
+
         {mintedNftState.state === "PENDING" && (
           <div className="text-xl text-white">LOADING...</div>
         )}
+
         {mintedNftState.state === "SUCCESS" && (
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid md:grid-cols-4 gap-2">
             {mintedNftState.data.map(
               ({ id, image, name, description, owner }) => {
                 return (
                   <div key={id} className="bg-white rounded p-2">
-                    <img
-                      src={image}
-                      className="mx-auto p-4 object-scale-down h-60"
-                      alt={name}
-                    />
+                    <div>
+                      <img
+                        src={image}
+                        className="mx-auto p-2 object-scale-down h-80"
+                        alt={name}
+                      />
+                    </div>
+
                     <div className="text-xl">{name}</div>
+
                     <div className="">{description}</div>
                     <hr className="my-4" />
+
                     <div className="text-left text-sm">Owned By:</div>
                     <div className="text-left text-xs tracking-tighter">
                       {owner}
                     </div>
-                    <button
-                      //onClick={}
-                      type="button"
-                      className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                    >
-                      Transfer
-                    </button>
+
+                    <div className="text-left text-xs m-1 space-x-1">
+                      <label>Transfer To:</label>
+                      <input
+                        className="rounded-md"
+                        type="text"
+                        onChange={(event) => {
+                          setRecAddress(event.target.value);
+                          setSenderAddress(owner);
+                          setTokenId(id);
+                        }}
+                      />
+
+                      <button
+                        className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        onClick={handleTransfer}
+                      >
+                        Gift
+                      </button>
+                    </div>
                   </div>
                 );
               }
@@ -161,6 +178,7 @@ export const HomePage = () => {
           </div>
         )}
       </div>
+
       {modalVisible && (
         <div
           className="fixed z-10 inset-0 overflow-y-auto"
@@ -203,20 +221,20 @@ export const HomePage = () => {
                     className="text-lg leading-6 font-medium text-gray-900"
                     id="modal-title"
                   >
-                    {purchaseState.state === "PENDING_METAMASK" &&
+                    {transactionState.state === "PENDING_METAMASK" &&
                       "Connecting Metamask..."}
-                    {purchaseState.state === "PENDING_SIGNER" &&
+                    {transactionState.state === "PENDING_SIGNER" &&
                       "Waiting for Signed Transaction"}
-                    {purchaseState.state === "PENDING_CONFIRMAION" &&
+                    {transactionState.state === "PENDING_CONFIRMAION" &&
                       "Waiting for Block Confirmation"}
                   </h3>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      {purchaseState.state === "PENDING_METAMASK" &&
+                      {transactionState.state === "PENDING_METAMASK" &&
                         "Allow Metamask to connect to this application in the extension."}
-                      {purchaseState.state === "PENDING_SIGNER" &&
-                        "Approve the purchase transaction within the Metamask extension"}
-                      {purchaseState.state === "PENDING_CONFIRMAION" &&
+                      {transactionState.state === "PENDING_SIGNER" &&
+                        "Approve the transaction within the Metamask extension"}
+                      {transactionState.state === "PENDING_CONFIRMAION" &&
                         "Transaction has been sent to the blockchain. Please wait while the transaction is being confirmed."}
                     </p>
                   </div>
