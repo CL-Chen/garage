@@ -7,7 +7,7 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-const contractAddress = "0x5f0b2778d6a49c7bdd9fdef6b0490318bb6ca195";
+const contractAddress = "0xC32C2F02DfFC46BA9EFD8421230C3EeE19fd2ae0";
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -110,7 +110,7 @@ export const HomePage = () => {
   return (
     <div className="min-h-screen  bg-gray-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <div className="text-gray-100 text-6xl pt-28 pb-20">ANIMALS</div>
+        <div className="text-gray-100 text-6xl pt-28 pb-20">Monsters Inc</div>
 
         <div className="mb-12">
           <button
@@ -118,7 +118,7 @@ export const HomePage = () => {
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Buy Your Own Animal
+            Purchase
           </button>
         </div>
 
