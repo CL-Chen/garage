@@ -78,35 +78,6 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
-  const [recAdress, setRecAddress] = useState("nullAdd");
-  const [senderAdress, setSenderAddress] = useState("nullSender");
-  const [tokenId, setTokenId] = useState("nullID");
-
-  const handleTransfer = async () => {
-    const { ethereum } = window;
-    if (typeof ethereum == "undefined") alert("Metamask is not detected");
-
-    setTansactionState({ state: "PENDING_METAMASK" });
-
-    await ethereum.request({ method: "eth_requestAccounts" });
-
-    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
-    const signer = provider_MetaMask.getSigner();
-    const contract = new Contract(contractAddress, abi, signer);
-
-    setTansactionState({ state: "PENDING_SIGNER" });
-    const receipt = await contract.transferFrom(
-      senderAdress,
-      recAdress,
-      tokenId
-    );
-    setTansactionState({ state: "PENDING_CONFIRMAION" });
-    const transaction = await receipt.wait();
-    setTansactionState({ state: "SUCCESS", transaction });
-
-    await loadRobotsData();
-  };
-
   return (
     <div className="min-h-screen  bg-gray-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
