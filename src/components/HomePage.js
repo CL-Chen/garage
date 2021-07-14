@@ -7,7 +7,7 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-const contractAddress = "0xACE5a55fA347c43cdc4271b8931D1338211C8644";
+const contractAddress = "0x8059ec7cf0491fb7879813e328c7b4a041b8996b";
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -70,6 +70,29 @@ export const HomePage = () => {
     setTansactionState({ state: "PENDING_SIGNER" });
     const receipt = await contract.purchase({
       value: utils.parseEther("1"),
+    });
+    setTansactionState({ state: "PENDING_CONFIRMAION" });
+    const transaction = await receipt.wait();
+    setTansactionState({ state: "SUCCESS", transaction });
+
+    await loadRobotsData();
+  };
+
+  const handleCollection = async () => {
+    const { ethereum } = window;
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+
+    setTansactionState({ state: "PENDING_METAMASK" });
+
+    await ethereum.request({ method: "eth_requestAccounts" });
+
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
+    const contract = new Contract(contractAddress, abi, signer);
+
+    setTansactionState({ state: "PENDING_SIGNER" });
+    const receipt = await contract.purchaseCollection({
+      value: utils.parseEther("8"),
     });
     setTansactionState({ state: "PENDING_CONFIRMAION" });
     const transaction = await receipt.wait();
@@ -177,6 +200,15 @@ export const HomePage = () => {
             )}
           </div>
         )}
+        <div className="mb-12">
+          <button
+            onClick={handleCollection}
+            type="button"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            Get the whole Collection!
+          </button>
+        </div>
       </div>
 
       {modalVisible && (
