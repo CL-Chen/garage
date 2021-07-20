@@ -56,7 +56,7 @@ export const HomePage = () => {
     loadRobotsData();
   }, []);
 
-  const purchaseHandler = async () => {
+  const handlePurchase = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
 
@@ -69,12 +69,18 @@ export const HomePage = () => {
     const contract = new Contract(contractAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
-    const receipt = await contract.purchase({
-      value: utils.parseEther("1"),
-    });
-    setTansactionState({ state: "PENDING_CONFIRMAION" });
-    const transaction = await receipt.wait();
-    setTansactionState({ state: "SUCCESS", transaction });
+
+    try {
+      const receipt = await contract.purchase({
+        value: utils.parseEther("1"),
+      });
+      setTansactionState({ state: "PENDING_CONFIRMAION" });
+      const transaction = await receipt.wait();
+      setTansactionState({ state: "SUCCESS", transaction });
+    } catch (err) {
+      alert("Transaction rejected, refreshing page");
+      setTansactionState({ state: "UNINITIALIZED" });
+    }
 
     await loadRobotsData();
   };
@@ -92,23 +98,32 @@ export const HomePage = () => {
     const contract = new Contract(contractAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
-    const receipt = await contract.purchaseCollection({
-      value: utils.parseEther("8"),
-    });
-    setTansactionState({ state: "PENDING_CONFIRMAION" });
-    const transaction = await receipt.wait();
-    setTansactionState({ state: "SUCCESS", transaction });
+    try {
+      const receipt = await contract.purchaseCollection({
+        value: utils.parseEther("8"),
+      });
+      setTansactionState({ state: "PENDING_CONFIRMAION" });
+      const transaction = await receipt.wait();
+      setTansactionState({ state: "SUCCESS", transaction });
+    } catch (err) {
+      alert("Transaction rejected, refreshing page");
+      setTansactionState({ state: "UNINITIALIZED" });
+    }
 
     await loadRobotsData();
   };
 
-  const [recAdress, setRecAddress] = useState("nullAdd");
-  const [senderAdress, setSenderAddress] = useState("nullSender");
+  const [recAddress, setRecAddress] = useState("nullAdd");
+  const [senderAddress, setSenderAddress] = useState("nullSender");
   const [tokenId, setTokenId] = useState("nullID");
 
-  const transferHandler = async () => {
+  const handleTransfer = async () => {
     const { ethereum } = window;
-    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+    if (typeof ethereum == "undefined") {
+      alert("Metamask is not detected");
+    } else if (recAddress === "nullAdd") {
+      return alert("No address detected in input box");
+    }
 
     setTansactionState({ state: "PENDING_METAMASK" });
 
@@ -119,14 +134,20 @@ export const HomePage = () => {
     const contract = new Contract(contractAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
-    const receipt = await contract.transferFrom(
-      senderAdress,
-      recAdress,
-      tokenId
-    );
-    setTansactionState({ state: "PENDING_CONFIRMAION" });
-    const transaction = await receipt.wait();
-    setTansactionState({ state: "SUCCESS", transaction });
+
+    try {
+      let receipt = await contract.transferFrom(
+        senderAddress,
+        recAddress,
+        tokenId
+      );
+      setTansactionState({ state: "PENDING_CONFIRMAION" });
+      const transaction = await receipt.wait();
+      setTansactionState({ state: "SUCCESS", transaction });
+    } catch (err) {
+      alert("Transaction rejected, refreshing page");
+      setTansactionState({ state: "UNINITIALIZED" });
+    }
 
     await loadRobotsData();
   };
@@ -140,7 +161,7 @@ export const HomePage = () => {
 
         <div className="mb-12">
           <button
-            onClick={purchaseHandler}
+            onClick={handlePurchase}
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
@@ -190,7 +211,7 @@ export const HomePage = () => {
 
                       <button
                         className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        onClick={transferHandler}
+                        onClick={handleTransfer}
                       >
                         Gift
                       </button>
@@ -207,7 +228,7 @@ export const HomePage = () => {
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Get a whole set (8 animals)!
+            Get the Whole Collection! (set of 8)
           </button>
         </div>
       </div>
