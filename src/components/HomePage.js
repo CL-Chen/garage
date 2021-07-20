@@ -29,6 +29,7 @@ export const HomePage = () => {
       state: "PENDING",
     });
     const totalSupply = await contract.totalSupply();
+
     const ids = [...Array(totalSupply.toNumber()).keys()];
     const deferredData = ids.reverse().map(async (id) => {
       const ipfsUri = await contract.tokenURI(id);
@@ -55,7 +56,7 @@ export const HomePage = () => {
     loadRobotsData();
   }, []);
 
-  const handlePurchase = async () => {
+  const purchaseHandler = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
 
@@ -105,7 +106,7 @@ export const HomePage = () => {
   const [senderAdress, setSenderAddress] = useState("nullSender");
   const [tokenId, setTokenId] = useState("nullID");
 
-  const handleTransfer = async () => {
+  const transferHandler = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
 
@@ -139,7 +140,7 @@ export const HomePage = () => {
 
         <div className="mb-12">
           <button
-            onClick={handlePurchase}
+            onClick={purchaseHandler}
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
@@ -189,7 +190,7 @@ export const HomePage = () => {
 
                       <button
                         className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        onClick={handleTransfer}
+                        onClick={transferHandler}
                       >
                         Gift
                       </button>
@@ -200,13 +201,13 @@ export const HomePage = () => {
             )}
           </div>
         )}
-        <div className="mb-12">
+        <div className="m-12">
           <button
             onClick={handleCollection}
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Get the whole Collection!
+            Get a whole set (8 animals)!
           </button>
         </div>
       </div>
