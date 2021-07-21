@@ -144,7 +144,6 @@ export const HomePage = () => {
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
       if (err.code === 4001) {
-        alert("Transaction rejected by user");
         setRecAddress("nullAdd");
         return setTansactionState({ state: "UNINITIALIZED" });
       } else {
