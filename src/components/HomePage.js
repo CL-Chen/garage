@@ -69,7 +69,6 @@ export const HomePage = () => {
     const contract = new Contract(contractAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
-
     try {
       const receipt = await contract.purchase({
         value: utils.parseEther("1"),
@@ -134,7 +133,6 @@ export const HomePage = () => {
     const contract = new Contract(contractAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
-
     try {
       let receipt = await contract.transferFrom(
         senderAddress,
@@ -145,11 +143,19 @@ export const HomePage = () => {
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
-      alert("Transaction rejected, refreshing page");
-      setTansactionState({ state: "UNINITIALIZED" });
+      if (err.code == 4001) {
+        alert("Transaction rejected by user, refreshing page");
+        return setTansactionState({ state: "UNINITIALIZED" });
+      } else {
+        alert(
+          "Unauthorised transaction, you are not the owner of the NFT token!"
+        );
+        return setTansactionState({ state: "UNINITIALIZED" });
+      }
     }
 
     await loadRobotsData();
+    setRecAddress("nullAdd");
   };
 
   return (
