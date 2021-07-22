@@ -7,7 +7,7 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-const contractAddress = "0x8059ec7cf0491fb7879813e328c7b4a041b8996b";
+const contractAddress = "0x3B4791a1d7a7ea07ba14C165a3088220C97cDEeB";
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -37,6 +37,7 @@ export const HomePage = () => {
       const formattedUri = formatIpfsUrl(ipfsUri);
       const metadata = (await axios.get(formattedUri)).data;
       const formattedImage = formatIpfsUrl(metadata.image);
+      //const approvedAddress = await contract.getApproved(id);
       return {
         id,
         name: metadata.name,
@@ -56,14 +57,13 @@ export const HomePage = () => {
     loadRobotsData();
   }, []);
 
+  // ============================================= HANDLERS ==================================================//
+
   const handlePurchase = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
-
     setTansactionState({ state: "PENDING_METAMASK" });
-
     await ethereum.request({ method: "eth_requestAccounts" });
-
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
     const contract = new Contract(contractAddress, abi, signer);
@@ -83,14 +83,12 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
+  // -------------------------------2nd Handler-------------------------------//
   const handleCollection = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
-
     setTansactionState({ state: "PENDING_METAMASK" });
-
     await ethereum.request({ method: "eth_requestAccounts" });
-
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
     const contract = new Contract(contractAddress, abi, signer);
@@ -110,11 +108,15 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
+  // -------------------------------3rd Handler-------------------------------//
+
+  // -----------------track variables------------------//
   const [recAddress, setRecAddress] = useState("nullAdd");
   const [senderAddress, setSenderAddress] = useState("nullSender");
   const [tokenId, setTokenId] = useState("nullID");
+  // -----------------track variables------------------//
 
-  const handleTransfer = async () => {
+  const handleTransfer = async (id) => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") {
       alert("Metamask is not detected");
@@ -144,13 +146,11 @@ export const HomePage = () => {
       if (err.code === 4001) {
         return setTansactionState({ state: "UNINITIALIZED" });
       } else if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
-        console.log(err.code);
         alert(
           "Unauthorised transaction, you are not the owner of the NFT token!"
         );
         return setTansactionState({ state: "UNINITIALIZED" });
       } else {
-        console.log(err.code);
         alert("Error detected, refreshing page");
         setTansactionState({ state: "UNINITIALIZED" });
       }
@@ -160,6 +160,75 @@ export const HomePage = () => {
     setRecAddress("nullAdd");
   };
 
+  // -------------------------------4th Handler-------------------------------//
+  const handleApprove = async (id) => {
+    const { ethereum } = window;
+    if (typeof ethereum == "undefined") {
+      alert("Metamask is not detected");
+    }
+    setTansactionState({ state: "PENDING_METAMASK" });
+    await ethereum.request({ method: "eth_requestAccounts" });
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
+    const contract = new Contract(contractAddress, abi, signer);
+
+    setTansactionState({ state: "PENDING_SIGNER" });
+    try {
+      const receipt = await contract.approve(
+        "0x3b4791a1d7a7ea07ba14c165a3088220c97cdeeb",
+        id
+      );
+      setTansactionState({ state: "PENDING_CONFIRMAION" });
+      const transaction = await receipt.wait();
+      setTansactionState({ state: "SUCCESS", transaction });
+    } catch (err) {
+      alert(err.code);
+      console.log(err.code);
+      setTansactionState({ state: "UNINITIALIZED" });
+    }
+
+    await loadRobotsData();
+  };
+
+  // -------------------------------5th Handler-------------------------------//
+  const handleSale = async (id) => {
+    const { ethereum } = window;
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+
+    setTansactionState({ state: "PENDING_METAMASK" });
+
+    await ethereum.request({ method: "eth_requestAccounts" });
+
+    const provider_MetaMask = new providers.Web3Provider(window.ethereum);
+    const signer = provider_MetaMask.getSigner();
+    const contract = new Contract(contractAddress, abi, signer);
+
+    setTansactionState({ state: "PENDING_SIGNER" });
+    try {
+      const receipt = await contract.facilitateSale(id, {
+        value: utils.parseEther("1.1"),
+      });
+      setTansactionState({ state: "PENDING_CONFIRMAION" });
+      const transaction = await receipt.wait();
+      setTansactionState({ state: "SUCCESS", transaction });
+    } catch (err) {
+      if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
+        alert("---NOT FOR SALE!---");
+        return setTansactionState({ state: "UNINITIALIZED" });
+      } else if (err.code === 4001) {
+        return setTansactionState({ state: "UNINITIALIZED" });
+      } else {
+        alert(err.code);
+        console.log(err.code);
+        setTansactionState({ state: "UNINITIALIZED" });
+      }
+    }
+
+    await loadRobotsData();
+  };
+
+  //======================================REACT WEBSITE STARTS HERE======================================//
+  //=====================================================================================================//
   return (
     <div className="min-h-screen bg-green-700">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 ">
@@ -168,6 +237,7 @@ export const HomePage = () => {
         </div>
 
         <div className="mb-12">
+          {/* 0======0 THE PURCHASE button 0======0 */}
           <button
             onClick={handlePurchase}
             type="button"
@@ -205,10 +275,36 @@ export const HomePage = () => {
                       {owner}
                     </div>
 
+                    <div>
+                      {/* 0======0 PUT UP FOR SALE button 0======0 */}
+                      <button
+                        onClick={() => {
+                          console.log(id);
+                          handleApprove(id);
+                        }}
+                        type="button"
+                        className="inline-flex items-left mr-3 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-700 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      >
+                        Put up for sale
+                      </button>
+
+                      {/* 0======0 BUY THIS TOKEN(ID) button 0======0 */}
+                      <button
+                        onClick={() => {
+                          console.log(id);
+                          handleSale(id);
+                        }}
+                        type="button"
+                        className="inline-flex items-right mr-3 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-800 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      >
+                        Buy this token
+                      </button>
+                    </div>
                     <div className="text-left text-xs m-1 space-x-1">
                       <label>Transfer To:</label>
+                      {/* 0======0 TRANSFER TO ADDRESS inputbox 0======0 */}
                       <input
-                        className="rounded-md"
+                        className="rounded-md border"
                         type="text"
                         onChange={(event) => {
                           setRecAddress(event.target.value);
@@ -216,7 +312,7 @@ export const HomePage = () => {
                           setTokenId(id);
                         }}
                       />
-
+                      {/* 0======0 HANDLE TRANSFER button 0======0 */}
                       <button
                         className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         onClick={handleTransfer}
@@ -240,6 +336,8 @@ export const HomePage = () => {
           </button>
         </div>
       </div>
+
+      {/* ================================================MODAL BOXES================================================ */}
 
       {modalVisible && (
         <div

@@ -538,6 +538,20 @@
     "type": "function"
   },
   {
+    "inputs": 
+    [
+      {
+        "internalType":"uint256",
+        "name":"tokenId",
+        "type":"uint256"
+      }
+    ],
+    "name": "facilitateSale",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "bytes32",
