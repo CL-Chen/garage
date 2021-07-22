@@ -283,7 +283,7 @@ export const HomePage = () => {
                           handleApprove(id);
                         }}
                         type="button"
-                        className="inline-flex items-left mr-3 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-700 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        className="inline-flex items-left mr-3 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                       >
                         Put up for sale
                       </button>
@@ -295,7 +295,7 @@ export const HomePage = () => {
                           handleSale(id);
                         }}
                         type="button"
-                        className="inline-flex items-right mr-3 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-800 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        className="inline-flex items-right mr-3 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                       >
                         Buy this token
                       </button>
