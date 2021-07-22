@@ -77,8 +77,7 @@ export const HomePage = () => {
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
-      alert("Transaction rejected, refreshing page");
-      setTansactionState({ state: "UNINITIALIZED" });
+      return setTansactionState({ state: "UNINITIALIZED" });
     }
 
     await loadRobotsData();
@@ -105,8 +104,7 @@ export const HomePage = () => {
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
-      alert("Transaction rejected, refreshing page");
-      setTansactionState({ state: "UNINITIALIZED" });
+      return setTansactionState({ state: "UNINITIALIZED" });
     }
 
     await loadRobotsData();
@@ -144,13 +142,17 @@ export const HomePage = () => {
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
       if (err.code === 4001) {
-        setRecAddress("nullAdd");
         return setTansactionState({ state: "UNINITIALIZED" });
-      } else {
+      } else if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
+        console.log(err.code);
         alert(
           "Unauthorised transaction, you are not the owner of the NFT token!"
         );
         return setTansactionState({ state: "UNINITIALIZED" });
+      } else {
+        console.log(err.code);
+        alert("Error detected, refreshing page");
+        setTansactionState({ state: "UNINITIALIZED" });
       }
     }
 
