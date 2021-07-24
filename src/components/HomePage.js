@@ -7,7 +7,13 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-const contractAddress = "0x3B4791a1d7a7ea07ba14C165a3088220C97cDEeB";
+// const addressArray = [
+//   "0x8059EC7cF0491Fb7879813E328c7B4A041B8996b",
+//   "0x3b4791a1d7a7ea07ba14c165a3088220c97cdeeb",
+//   "0xdc39fa7a037fad1a8533a8be965d6b174900fa62",
+// ];
+const contractAddress = "0x8059EC7cF0491Fb7879813E328c7B4A041B8996b";
+const middleManAddress = "0x19d15D6717aCd964e585891e58D8b74c4d495684";
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -28,6 +34,8 @@ export const HomePage = () => {
     setMintedNftState({
       state: "PENDING",
     });
+    // for (const contAddress of addressArray) {
+    //   const contract = new Contract(contractAddress, abi, provider);
     const totalSupply = await contract.totalSupply();
 
     const ids = [...Array(totalSupply.toNumber()).keys()];
@@ -77,6 +85,7 @@ export const HomePage = () => {
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
+      console.log(err);
       return setTansactionState({ state: "UNINITIALIZED" });
     }
 
@@ -112,11 +121,11 @@ export const HomePage = () => {
 
   // -----------------track variables------------------//
   const [recAddress, setRecAddress] = useState("nullAdd");
-  const [senderAddress, setSenderAddress] = useState("nullSender");
-  const [tokenId, setTokenId] = useState("nullID");
+  // const [senderAddress, setSenderAddress] = useState("nullSender");
+  // const [tokenId, setTokenId] = useState("nullID");
   // -----------------track variables------------------//
 
-  const handleTransfer = async (id) => {
+  const handleTransfer = async (id, owner) => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") {
       alert("Metamask is not detected");
@@ -134,11 +143,7 @@ export const HomePage = () => {
 
     setTansactionState({ state: "PENDING_SIGNER" });
     try {
-      let receipt = await contract.transferFrom(
-        senderAddress,
-        recAddress,
-        tokenId
-      );
+      let receipt = await contract.transferFrom(owner, recAddress, id);
       setTansactionState({ state: "PENDING_CONFIRMAION" });
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
@@ -174,17 +179,19 @@ export const HomePage = () => {
 
     setTansactionState({ state: "PENDING_SIGNER" });
     try {
-      const receipt = await contract.approve(
-        "0x3b4791a1d7a7ea07ba14c165a3088220c97cdeeb",
-        id
-      );
+      const receipt = await contract.approve(middleManAddress, id);
       setTansactionState({ state: "PENDING_CONFIRMAION" });
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
-      alert(err.code);
-      console.log(err.code);
-      setTansactionState({ state: "UNINITIALIZED" });
+      if (err.code === 4001) {
+        return setTansactionState({ state: "UNINITIALIZED" });
+      } else if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
+        alert("You are not the owner");
+        return setTansactionState({ state: "UNINITIALIZED" });
+      } else {
+        alert("ERROR 888(fafafa), refreshing page");
+      }
     }
 
     await loadRobotsData();
@@ -201,7 +208,7 @@ export const HomePage = () => {
 
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
-    const contract = new Contract(contractAddress, abi, signer);
+    const contract = new Contract(middleManAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
     try {
@@ -279,7 +286,6 @@ export const HomePage = () => {
                       {/* 0======0 PUT UP FOR SALE button 0======0 */}
                       <button
                         onClick={() => {
-                          console.log(id);
                           handleApprove(id);
                         }}
                         type="button"
@@ -291,7 +297,6 @@ export const HomePage = () => {
                       {/* 0======0 BUY THIS TOKEN(ID) button 0======0 */}
                       <button
                         onClick={() => {
-                          console.log(id);
                           handleSale(id);
                         }}
                         type="button"
@@ -308,14 +313,14 @@ export const HomePage = () => {
                         type="text"
                         onChange={(event) => {
                           setRecAddress(event.target.value);
-                          setSenderAddress(owner);
-                          setTokenId(id);
                         }}
                       />
                       {/* 0======0 HANDLE TRANSFER button 0======0 */}
                       <button
                         className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
-                        onClick={handleTransfer}
+                        onClick={() => {
+                          handleTransfer(id, owner);
+                        }}
                       >
                         Gift
                       </button>
