@@ -7,13 +7,11 @@ import axios from "axios";
 const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
-// const addressArray = [
-//   "0x8059EC7cF0491Fb7879813E328c7B4A041B8996b",
-//   "0x3b4791a1d7a7ea07ba14c165a3088220c97cdeeb",
-//   "0xdc39fa7a037fad1a8533a8be965d6b174900fa62",
-// ];
-const contractAddress = "0x8059EC7cF0491Fb7879813E328c7B4A041B8996b";
-const middleManAddress = "0x19d15D6717aCd964e585891e58D8b74c4d495684";
+
+const contractAddress = "0x3B4791a1d7a7ea07ba14C165a3088220C97cDEeB";
+// 0xACE5a55fA347c43cdc4271b8931D1338211C8644
+const middleManAddress = "0x687Df94Ad2b1555c41160Aa489a4Ee4fA059F44E";
+// 0xab681B1425309eB80A29C1ab1fDEe950262F7a47
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
 const contract = new Contract(contractAddress, abi, provider);
 
@@ -34,18 +32,15 @@ export const HomePage = () => {
     setMintedNftState({
       state: "PENDING",
     });
-    // for (const contAddress of addressArray) {
-    //   const contract = new Contract(contractAddress, abi, provider);
-    const totalSupply = await contract.totalSupply();
 
-    const ids = [...Array(totalSupply.toNumber()).keys()];
-    const deferredData = ids.reverse().map(async (id) => {
+    const totalSupply = await contract.totalSupply();
+    const ids = [...Array(Number(totalSupply)).keys()];
+    const deferredData = ids.map(async (id) => {
       const ipfsUri = await contract.tokenURI(id);
       const owner = await contract.ownerOf(id);
       const formattedUri = formatIpfsUrl(ipfsUri);
       const metadata = (await axios.get(formattedUri)).data;
       const formattedImage = formatIpfsUrl(metadata.image);
-      //const approvedAddress = await contract.getApproved(id);
       return {
         id,
         name: metadata.name,
@@ -65,9 +60,10 @@ export const HomePage = () => {
     loadRobotsData();
   }, []);
 
-  // ============================================= HANDLERS ==================================================//
+  // ============================================= Button Handlers ==================================================//
 
-  const handlePurchase = async () => {
+  // ----------------------1st Handler : purchase One Token (mint new token---------------------- //
+  const handleBuyAnimal = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
     setTansactionState({ state: "PENDING_METAMASK" });
@@ -75,7 +71,6 @@ export const HomePage = () => {
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
     const contract = new Contract(contractAddress, abi, signer);
-
     setTansactionState({ state: "PENDING_SIGNER" });
     try {
       const receipt = await contract.purchase({
@@ -92,32 +87,38 @@ export const HomePage = () => {
     await loadRobotsData();
   };
 
-  // -------------------------------2nd Handler-------------------------------//
-  const handleCollection = async () => {
+  // ----------------------2nd Handler : purchase Multiple Tokens---------------------- //
+  const [buyQty, setBuyQty] = useState("1");
+
+  const handlePurchaseMultiple = async () => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
     setTansactionState({ state: "PENDING_METAMASK" });
     await ethereum.request({ method: "eth_requestAccounts" });
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
-    const contract = new Contract(contractAddress, abi, signer);
+    const contract = new Contract(middleManAddress, abi, signer);
 
     setTansactionState({ state: "PENDING_SIGNER" });
     try {
-      const receipt = await contract.purchaseCollection({
-        value: utils.parseEther("8"),
+      const receipt = await contract.purchaseMultipleTokens(buyQty, {
+        value: utils.parseEther(buyQty),
       });
       setTansactionState({ state: "PENDING_CONFIRMAION" });
       const transaction = await receipt.wait();
       setTansactionState({ state: "SUCCESS", transaction });
     } catch (err) {
+      if (err.code === "INSUFFICIENT_FUNDS") {
+        alert("INSUFFICIENT_FUNDS");
+      }
+      console.log(err.code);
       return setTansactionState({ state: "UNINITIALIZED" });
     }
 
     await loadRobotsData();
   };
 
-  // -------------------------------3rd Handler-------------------------------//
+  // ----------------------3rd Handler: Transfer token to others (e.g. Gift)---------------------- //
 
   // -----------------track variables------------------//
   const [recAddress, setRecAddress] = useState("nullAdd");
@@ -125,17 +126,15 @@ export const HomePage = () => {
   // const [tokenId, setTokenId] = useState("nullID");
   // -----------------track variables------------------//
 
-  const handleTransfer = async (id, owner) => {
+  const handleGift = async (id, owner) => {
     const { ethereum } = window;
-    if (typeof ethereum == "undefined") {
-      alert("Metamask is not detected");
-    } else if (recAddress === "nullAdd") {
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+    setTansactionState({ state: "PENDING_METAMASK" });
+    await ethereum.request({ method: "eth_requestAccounts" });
+    if (recAddress === "nullAdd" || recAddress === "receiver address here") {
+      setTansactionState({ state: "UNINITIALIZED" });
       return alert("No address detected in input box");
     }
-
-    setTansactionState({ state: "PENDING_METAMASK" });
-
-    await ethereum.request({ method: "eth_requestAccounts" });
 
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
@@ -156,7 +155,7 @@ export const HomePage = () => {
         );
         return setTansactionState({ state: "UNINITIALIZED" });
       } else {
-        alert("Error detected, refreshing page");
+        alert(err.message);
         setTansactionState({ state: "UNINITIALIZED" });
       }
     }
@@ -165,12 +164,10 @@ export const HomePage = () => {
     setRecAddress("nullAdd");
   };
 
-  // -------------------------------4th Handler-------------------------------//
+  // ----------------------4th Handler: Give approval to NFT Contract---------------------- //
   const handleApprove = async (id) => {
     const { ethereum } = window;
-    if (typeof ethereum == "undefined") {
-      alert("Metamask is not detected");
-    }
+    if (typeof ethereum == "undefined") alert("Metamask is not detected");
     setTansactionState({ state: "PENDING_METAMASK" });
     await ethereum.request({ method: "eth_requestAccounts" });
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
@@ -190,22 +187,19 @@ export const HomePage = () => {
         alert("You are not the owner");
         return setTansactionState({ state: "UNINITIALIZED" });
       } else {
-        alert("ERROR 888(fafafa), refreshing page");
+        alert(err.message);
       }
     }
 
     await loadRobotsData();
   };
 
-  // -------------------------------5th Handler-------------------------------//
-  const handleSale = async (id) => {
+  // ----------------------5th Handler : Purchase from another owner---------------------- //
+  const handleBuyFromOwner = async (id) => {
     const { ethereum } = window;
     if (typeof ethereum == "undefined") alert("Metamask is not detected");
-
     setTansactionState({ state: "PENDING_METAMASK" });
-
     await ethereum.request({ method: "eth_requestAccounts" });
-
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
     const signer = provider_MetaMask.getSigner();
     const contract = new Contract(middleManAddress, abi, signer);
@@ -221,12 +215,12 @@ export const HomePage = () => {
     } catch (err) {
       if (err.code === "UNPREDICTABLE_GAS_LIMIT") {
         alert("---NOT FOR SALE!---");
+        console.log(err.code);
         return setTansactionState({ state: "UNINITIALIZED" });
       } else if (err.code === 4001) {
         return setTansactionState({ state: "UNINITIALIZED" });
       } else {
-        alert(err.code);
-        console.log(err.code);
+        alert(err.message);
         setTansactionState({ state: "UNINITIALIZED" });
       }
     }
@@ -246,7 +240,7 @@ export const HomePage = () => {
         <div className="mb-12">
           {/* 0======0 THE PURCHASE button 0======0 */}
           <button
-            onClick={handlePurchase}
+            onClick={handleBuyAnimal}
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
@@ -297,7 +291,7 @@ export const HomePage = () => {
                       {/* 0======0 BUY THIS TOKEN(ID) button 0======0 */}
                       <button
                         onClick={() => {
-                          handleSale(id);
+                          handleBuyFromOwner(id);
                         }}
                         type="button"
                         className="inline-flex items-center mr-2.5 px-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
@@ -311,6 +305,7 @@ export const HomePage = () => {
                       <input
                         className="rounded-md border"
                         type="text"
+                        placeholder="receiver address here"
                         onChange={(event) => {
                           setRecAddress(event.target.value);
                         }}
@@ -319,7 +314,7 @@ export const HomePage = () => {
                       <button
                         className=" items-center px-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-gray-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         onClick={() => {
-                          handleTransfer(id, owner);
+                          handleGift(id, owner);
                         }}
                       >
                         Gift
@@ -332,12 +327,21 @@ export const HomePage = () => {
           </div>
         )}
         <div className="m-12">
+          <label>Buy Quantity:</label>
+          <input
+            className="rounded-md border py-2 text-center"
+            type="number"
+            placeholder="Quatity of tokens"
+            onChange={(event) => {
+              setBuyQty(event.target.value);
+            }}
+          />
           <button
-            onClick={handleCollection}
+            onClick={handlePurchaseMultiple}
             type="button"
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-red-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
-            Get the Whole Collection! (set of 8)
+            Purchase Multiple Animals!
           </button>
         </div>
       </div>
