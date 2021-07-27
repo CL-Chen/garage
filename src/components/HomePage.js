@@ -8,7 +8,7 @@ const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
 
-const contractAddress = "0x168ef7080CCA4b08bFb60ad3F8C71c0FbBCc2b16";
+const contractAddress = "0xef71555F6a754fDC4D35903Fc1F8aEE11543028A";
 // const middleManAddress = "0x9040B1f53f9c5100E632876f6DD552380a6B4763";
 
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
@@ -46,7 +46,6 @@ export const HomePage = () => {
         16
       );
       const approvedContract = await contract.getApproved(id);
-      alert(approvedContract);
 
       return {
         id,
@@ -266,6 +265,12 @@ export const HomePage = () => {
             className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-900 hover:bg-yellow-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
           >
             Buy Your Own Animal
+            <img
+              className="float-left"
+              src="https://img.icons8.com/ios-filled/30/26e07f/ethereum.png"
+              alt=""
+            />
+            1
           </button>
         </div>
 
@@ -309,7 +314,7 @@ export const HomePage = () => {
                     <div className="border-2 border-none mt-1.5 text-right h-9 float-right font-sans text-2xl w-auto">
                       <img
                         className="float-left"
-                        src="https://img.icons8.com/nolan/30/ethereum.png"
+                        src="https://img.icons8.com/ios-filled/30/1B711E/ethereum.png"
                         alt=""
                       />
                       {approvedContract !== contractAddress
