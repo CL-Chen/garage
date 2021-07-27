@@ -181,7 +181,12 @@ export const HomePage = () => {
   const [sellingPrice, setSellingPrice] = useState(null);
   const handleSetPrice = async (id) => {
     const { ethereum } = window;
-    if (typeof ethereum == "undefined") alert("Metamask is not detected");
+    if (typeof ethereum == "undefined") {
+      alert("Metamask is not detected");
+    } else if (sellingPrice === null) {
+      alert("Please enter a sell price");
+      return setTansactionState({ state: "UNINITIALIZED" });
+    }
     setTansactionState({ state: "PENDING_METAMASK" });
     await ethereum.request({ method: "eth_requestAccounts" });
     const provider_MetaMask = new providers.Web3Provider(window.ethereum);
