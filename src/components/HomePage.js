@@ -267,7 +267,7 @@ export const HomePage = () => {
             Buy Your Own Animal
             <img
               className="float-left"
-              src="https://img.icons8.com/ios-filled/30/26e07f/ethereum.png"
+              src="https://img.icons8.com/ios-filled/30/DCFFDC/ethereum.png"
               alt=""
             />
             1
@@ -314,7 +314,7 @@ export const HomePage = () => {
                     <div className="border-2 border-none mt-1.5 text-right h-9 float-right font-sans text-2xl w-auto">
                       <img
                         className="float-left"
-                        src="https://img.icons8.com/ios-filled/30/1B711E/ethereum.png"
+                        src="https://img.icons8.com/ios-filled/30/187018/ethereum.png"
                         alt=""
                       />
                       {approvedContract !== contractAddress
