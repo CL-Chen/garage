@@ -8,7 +8,7 @@ const formatIpfsUrl = (url) => {
   return url.replace(/ipfs:\/\//g, "https://cloudflare-ipfs.com/");
 };
 
-const contractAddress = "0xef71555F6a754fDC4D35903Fc1F8aEE11543028A";
+const contractAddress = "0xaDda07286a5f6180F045740302BF66fB06f4D958";
 // const middleManAddress = "0x9040B1f53f9c5100E632876f6DD552380a6B4763";
 
 const provider = getDefaultProvider("rinkeby", { alchemy: config.alchemyKey });
@@ -92,7 +92,7 @@ export const HomePage = () => {
         alert("INSUFFICIENT_FUNDS");
         return setTansactionState({ state: "UNINITIALIZED" });
       } else {
-        console.log(err);
+        alert(err.message);
         return setTansactionState({ state: "UNINITIALIZED" });
       }
     }
@@ -124,7 +124,7 @@ export const HomePage = () => {
       if (err.code === "INSUFFICIENT_FUNDS") {
         alert("INSUFFICIENT_FUNDS");
       }
-      console.log(err.code);
+      console.log(err.message);
       return setTansactionState({ state: "UNINITIALIZED" });
     }
 
@@ -343,10 +343,11 @@ export const HomePage = () => {
                           }}
                         />
                         <button
-                          className="inline-flex items-center px-2 ml-1 border border-transparent text-base font-medium rounded-md shadow-sm text-gray-500 bg-yellow-100 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                           onClick={() => {
                             handleGift(id, owner);
                           }}
+                          type="button"
+                          className="inline-flex items-center px-2 ml-1 border border-transparent text-base font-medium rounded-md shadow-sm text-gray-500 bg-yellow-100 hover:bg-yellow-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                         >
                           gift
                         </button>
@@ -401,7 +402,7 @@ export const HomePage = () => {
           <input
             className="rounded-md border py-2 text-center"
             type="number"
-            placeholder="Quatity of tokens"
+            placeholder="Quantity of tokens"
             onChange={(event) => {
               setBuyQty(event.target.value);
             }}
